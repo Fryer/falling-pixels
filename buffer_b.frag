@@ -50,14 +50,22 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     if (iMouse.z > 0.5 && distance(iMouse.xy, fragCoord) < 20.0) {
         // Mouse pressed.
         float value = noise(pos);
-        value = float(value > 0.5) * (0.5 + 0.5 * value);
         bool water = texelFetch(iChannel2, ivec2(87, 0), 0).r > 0.0;
         if (water) {
             // W pressed, add water.
+            value = float(value > 0.5);
             fragColor = vec4(value, 0.0, 1.0, 0.0);
             return;
         }
+        bool bedrock = texelFetch(iChannel2, ivec2(66, 0), 0).r > 0.0;
+        if (bedrock) {
+            // B pressed, add bedrock.
+            value = 0.75 + value * 0.25;
+            fragColor = vec4(max(0.75, value), 1.0, 0.0, 0.0);
+            return;
+        }
         // No key, add sand.
+        value = float(value > 0.5) * (0.5 + 0.5 * value);
        	fragColor = vec4(value, 0.0, 0.0, 0.0);
         return;
     }

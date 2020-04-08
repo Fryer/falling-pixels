@@ -19,13 +19,19 @@ float noise(ivec2 pos) {
     return texelFetch(iChannel1, noiseCoord % 64, 0).r;
 }
 
-ivec2 bubble(ivec2 pos, bool isWater) {
+ivec2 bubble(ivec2 pos, vec4 self) {
+    if (self.g > 0.5) {
+        // Self is bedrock, can't bubble.
+        return pos;
+    }
     if (iFrame % 2 == 0) {
         // Bubble at half speed.
         return pos;
     }
-    if (isWater) {
-        if (pixel(pos + A).r < 0.5 || pixel(pos + A).b > 0.5) {
+    if (self.b > 0.5) {
+        // Self is water.
+        vec4 above = pixel(pos + A);
+        if (above.r < 0.5 || above.g > 0.5 || above.b > 0.5) {
             // No sand above, can't bubble.
             return pos;
         }
@@ -40,6 +46,7 @@ ivec2 bubble(ivec2 pos, bool isWater) {
         // Bubble up.
         return pos + A;
     }
+    // Self is sand.
     if (pixel(pos + B).b < 0.5) {
         // No water below, can't bubble.
         return pos;
@@ -107,8 +114,8 @@ ivec2 flow(ivec2 pos) {
 
 bool rollRight(ivec2 pos) {
     vec4 aboveLeft = pixel(pos + AL);
-    if (aboveLeft.b > 0.5) {
-        // Above left is water, can't roll.
+    if (aboveLeft.g > 0.5 || aboveLeft.b > 0.5) {
+        // Above left is not sand, can't roll.
         return false;
     }
     if (pixel(pos + L).r > 0.5 && aboveLeft.r > 0.5) {
@@ -127,8 +134,8 @@ bool rollRight(ivec2 pos) {
 
 bool rollLeft(ivec2 pos) {
     vec4 aboveRight = pixel(pos + AR);
-    if (aboveRight.b > 0.5) {
-        // Above right is water, can't roll.
+    if (aboveRight.g > 0.5 || aboveRight.b > 0.5) {
+        // Above right is not sand, can't roll.
         return false;
     }
     if (pixel(pos + R).r > 0.5 && aboveRight.r > 0.5) {
@@ -169,14 +176,10 @@ ivec2 roll(ivec2 pos) {
 }
 
 ivec2 receive(ivec2 pos) {
-    if (pos.y < 0) {
-        // Stop at bottom.
-        return pos;
-    }
     vec4 self = pixel(pos);
     if (self.r > 0.5) {
         // Self not empty.
-        ivec2 bubblePos = bubble(pos, self.b > 0.5);
+        ivec2 bubblePos = bubble(pos, self);
         if (bubblePos != pos) {
             // Receive bubbling.
             return bubblePos;
@@ -185,7 +188,7 @@ ivec2 receive(ivec2 pos) {
         return pos;
     }
     vec4 above = pixel(pos + A);
-    if (above.r > 0.5) {
+    if (above.r > 0.5 && above.g < 0.5) {
         if (pixel(pos + AL).r > 0.5 && pixel(pos + AR).r > 0.5) {
             // Self contested from roll, let above fall.
             return pos + A;
@@ -205,7 +208,7 @@ ivec2 receive(ivec2 pos) {
         // Receive flowing.
         return flowPos;
     }
-    if (above.r > 0.5) {
+    if (above.r > 0.5 && above.g < 0.5) {
         // Receive falling.
         return pos + A;
     }

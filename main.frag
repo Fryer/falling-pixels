@@ -20,6 +20,14 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         }
         return;
     }
+    if (pixel.g > 0.5) {
+        // Bedrock.
+        vec2 noiseCoord = fragCoord * vec2(0.25, 1.0) / 64.0;
+        float noise = texture(iChannel1, noiseCoord).r;
+        noise = 0.25 + noise * 0.1 + pixel.r * 0.2;
+        fragColor = vec4(vec3(1) * noise, 1.0);
+        return;
+    }
     // Sand.
-    fragColor = vec4(pixel.rrr * vec3(1.0, 0.8, 0.4), 1.0);
+    fragColor = vec4(vec3(1.0, 0.8, 0.4) * pixel.r, 1.0);
 }
