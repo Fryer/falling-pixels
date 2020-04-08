@@ -212,41 +212,9 @@ ivec2 receive(ivec2 pos) {
     return pos;
 }
 
-vec4 move(ivec2 pos, vec4 self) {
-    if (receive(pos + B) == pos) { return vec4(0); }
-    if (receive(pos + BL) == pos) { return vec4(0); }
-    if (receive(pos + BR) == pos) { return vec4(0); }
-    if (receive(pos + L) == pos) { return vec4(0); }
-    if (receive(pos + R) == pos) { return vec4(0); }
-    if (receive(pos + A) == pos) { return vec4(0); }
-    return self;
-}
-
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     ivec2 pos = ivec2(fragCoord);
-    if (iMouse.z > 0.5 && distance(iMouse.xy, fragCoord) < 20.0) {
-        // Mouse pressed.
-        float value = noise(pos);
-        value = float(value > 0.5) * (0.5 + 0.5 * value);
-        bool water = texelFetch(iChannel2, ivec2(87, 0), 0).r > 0.0;
-        if (water) {
-            // W pressed, add water.
-            fragColor = vec4(value, 0.0, 1.0, 0.0);
-            return;
-        }
-        // No key, add sand.
-       	fragColor = vec4(value, 0.0, 0.0, 0.0);
-        return;
-    }
     ivec2 receivePos = receive(pos);
-    if (receivePos != pos) {
-        // Receive.
-        fragColor = pixel(receivePos);
-        return;
-    }
-    vec4 self = pixel(pos);
-    if (self.r > 0.5) {
-        // Move.
-        fragColor = move(ivec2(fragCoord), pixel(pos));
-    }
+    ivec2 offset = receivePos - pos;
+    fragColor = vec4(float(offset.x + 1) / 2.0, float(offset.y + 1) / 2.0, 0.0, 0.0);
 }
