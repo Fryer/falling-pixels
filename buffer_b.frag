@@ -45,6 +45,18 @@ vec4 move(ivec2 pos, vec4 self) {
     return self;
 }
 
+vec4 boil(ivec2 pos, vec4 self) {
+    if (noise(pos) > 0.1) {
+        // Boil slow.
+        return self;
+    }
+    if (pixel(receive(pos + A)).a > 0.5) { return vec4(0); }
+    if (pixel(receive(pos + B)).a > 0.5) { return vec4(0); }
+    if (pixel(receive(pos + L)).a > 0.5) { return vec4(0); }
+    if (pixel(receive(pos + R)).a > 0.5) { return vec4(0); }
+    return self;
+}
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     ivec2 pos = ivec2(fragCoord);
     if (iMouse.z > 0.5 && distance(iMouse.xy, fragCoord) < 20.0) {
@@ -79,6 +91,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // Receive particle.
     ivec2 receivePos = receive(pos);
     fragColor = pixel(receivePos);
+    if (fragColor.b > 0.5 && fragColor.a < 0.5) {
+        // Received water, boil if near lava.
+        fragColor = boil(pos, fragColor);
+    }
     if (receivePos == pos) {
         // Didn't receive from neighbor.
         if (fragColor.r > 0.5) {
