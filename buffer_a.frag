@@ -20,8 +20,8 @@ float noise(ivec2 pos) {
 }
 
 ivec2 bubble(ivec2 pos, vec4 self) {
-    if (self.g > 0.5) {
-        // Self is bedrock, can't bubble.
+    if (self.g > 0.5 || self.a > 0.5) {
+        // Self is bedrock or lava, can't bubble.
         return pos;
     }
     if (iFrame % 2 == 0) {
@@ -47,7 +47,8 @@ ivec2 bubble(ivec2 pos, vec4 self) {
         return pos + A;
     }
     // Self is sand.
-    if (pixel(pos + B).b < 0.5) {
+    vec4 below = pixel(pos + B);
+    if (below.b < 0.5 || below.a > 0.5) {
         // No water below, can't bubble.
         return pos;
     }

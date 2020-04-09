@@ -6,6 +6,19 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         fragColor = vec4(0.0, 0.0, 0.0, 1.0);
         return;
     }
+    if (pixel.a > 0.5) {
+        // Lava.
+        vec2 noiseCoordA = fragCoord * vec2(0.2, 1.0) / 64.0;
+        noiseCoordA.x += float(iFrame) * 0.001;
+        vec2 noiseCoordB = fragCoord * vec2(0.2, 1.0) / 64.0;
+        noiseCoordB -= vec2(float(iFrame) * 0.001, 0.5);
+        float noiseA = texture(iChannel1, noiseCoordA).r;
+        float noiseB = texture(iChannel1, noiseCoordB).r;
+        float noise = noiseA * noiseB;
+        fragColor = vec4(0.8, 0.4, 0.0, 1.0);
+        fragColor += vec4(0.1, 0.4, 0.2, 0.0) * noise;
+        return;
+    }
     if (pixel.b > 0.5) {
         // Water.
         ivec2 noiseCoordA = pos + ivec2(iFrame * 23, 0);

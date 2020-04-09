@@ -57,6 +57,13 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
             fragColor = vec4(value, 0.0, 1.0, 0.0);
             return;
         }
+        bool lava = texelFetch(iChannel2, ivec2(76, 0), 0).r > 0.0;
+        if (lava) {
+            // L pressed, add lava.
+            value = float(value > 0.5);
+            fragColor = vec4(value, 0.0, 1.0, 1.0);
+            return;
+        }
         bool bedrock = texelFetch(iChannel2, ivec2(66, 0), 0).r > 0.0;
         if (bedrock) {
             // B pressed, add bedrock.
