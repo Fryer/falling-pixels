@@ -54,14 +54,14 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         if (water) {
             // W pressed, add water.
             value = float(value > 0.5);
-            fragColor = vec4(value, 0.0, 1.0, 0.0);
+            fragColor = value * vec4(1.0, 0.0, 1.0, 0.0);
             return;
         }
         bool lava = texelFetch(iChannel2, ivec2(76, 0), 0).r > 0.0;
         if (lava) {
             // L pressed, add lava.
             value = float(value > 0.5);
-            fragColor = vec4(value, 0.0, 1.0, 1.0);
+            fragColor = value * vec4(1.0, 0.0, 1.0, 1.0);
             return;
         }
         bool bedrock = texelFetch(iChannel2, ivec2(66, 0), 0).r > 0.0;
@@ -76,15 +76,14 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
        	fragColor = vec4(value, 0.0, 0.0, 0.0);
         return;
     }
+    // Receive particle.
     ivec2 receivePos = receive(pos);
-    if (receivePos != pos) {
-        // Receive.
-        fragColor = pixel(receivePos);
-        return;
-    }
-    vec4 self = pixel(pos);
-    if (self.r > 0.5) {
-        // Move.
-        fragColor = move(ivec2(fragCoord), pixel(pos));
+    fragColor = pixel(receivePos);
+    if (receivePos == pos) {
+        // Didn't receive from neighbor.
+        if (fragColor.r > 0.5) {
+            // Move.
+            fragColor = move(ivec2(fragCoord), fragColor);
+        }
     }
 }
