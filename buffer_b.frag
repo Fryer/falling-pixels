@@ -17,6 +17,11 @@ float noise(ivec2 pos) {
     return texelFetch(iChannel1, noiseCoord % 64, 0).r;
 }
 
+float noise2(ivec2 pos) {
+    ivec2 noiseCoord = pos + ivec2(iFrame * 7, iFrame * 23);
+    return texelFetch(iChannel1, noiseCoord % 64, 0).r;
+}
+
 ivec2 receive(ivec2 pos) {
     if (pos.y < 0 || pos.y >= int(iResolution.y)) {
         // Stop at bottom and top.
@@ -77,6 +82,25 @@ vec4 melt(ivec2 pos, vec4 self) {
     return self;
 }
 
+vec4 freeze(ivec2 pos, vec4 self) {
+    if (noise(pos) > 0.06) {
+        // Freeze slow.
+        return self;
+    }
+    bool shouldFreeze = false;
+    if (
+        (pixel(receive(pos + A)).b > 0.5 && pixel(receive(pos + A)).a < 0.5) ||
+        (pixel(receive(pos + B)).b > 0.5 && pixel(receive(pos + B)).a < 0.5) ||
+        (pixel(receive(pos + L)).b > 0.5 && pixel(receive(pos + L)).a < 0.5) ||
+        (pixel(receive(pos + R)).b > 0.5 && pixel(receive(pos + R)).a < 0.5)
+    ) {
+        // Near water, freeze to sand.
+        float value = 0.75 + 0.25 * noise2(pos);
+        return  vec4(value, 0.0, 0.0, 0.0);
+    }
+    return self;
+}
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     ivec2 pos = ivec2(fragCoord);
     if (iMouse.z > 0.5 && distance(iMouse.xy, fragCoord) < 20.0) {
@@ -111,6 +135,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // Receive particle.
     ivec2 receivePos = receive(pos);
     fragColor = pixel(receivePos);
+    if (fragColor.a > 0.5) {
+        // Received lava, freeze if near water.
+        fragColor = freeze(pos, fragColor);
+    }
     if (fragColor.b > 0.5 && fragColor.a < 0.5) {
         // Received water, boil if near lava.
         fragColor = boil(pos, fragColor);
