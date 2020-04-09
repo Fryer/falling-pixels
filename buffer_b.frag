@@ -57,6 +57,26 @@ vec4 boil(ivec2 pos, vec4 self) {
     return self;
 }
 
+vec4 melt(ivec2 pos, vec4 self) {
+    if (noise(pos) > 0.06) {
+        // Melt slow.
+        return self;
+    }
+    if (pixel(receive(pos + B)).a > 0.5) {
+        // Over lava, melt.
+        if (noise(pos) > 0.04) {
+            // Convert some sand into lava.
+            return vec4(1.0, 0.0, 1.0, 1.0);
+        }
+        return vec4(0);
+    }
+    if (noise(pos) > 0.04 && (pixel(receive(pos + BL)).a > 0.5 || pixel(receive(pos + BR)).a > 0.5)) {
+        // Diagonally over lava, melt slower.
+        return vec4(0);
+    }
+    return self;
+}
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     ivec2 pos = ivec2(fragCoord);
     if (iMouse.z > 0.5 && distance(iMouse.xy, fragCoord) < 20.0) {
@@ -94,6 +114,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     if (fragColor.b > 0.5 && fragColor.a < 0.5) {
         // Received water, boil if near lava.
         fragColor = boil(pos, fragColor);
+    }
+    if (fragColor.r > 0.5 && fragColor.g < 0.5 && fragColor.b < 0.5 && fragColor.a < 0.5) {
+        // Received sand, melt if near lava.
+        fragColor = melt(pos, fragColor);
     }
     if (receivePos == pos) {
         // Didn't receive from neighbor.
