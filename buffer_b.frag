@@ -19,7 +19,7 @@ float noise(ivec2 pos) {
     return texelFetch(iChannel1, noiseCoord % 64, 0).r;
 }
 
-float noise2(ivec2 pos) {
+float noiseB(ivec2 pos) {
     int n = (iFrame + 2048) % 4096 * 2531;
     ivec2 noiseCoord = pos + ivec2(n, n / 64);
     return texelFetch(iChannel1, noiseCoord % 64, 0).r;
@@ -98,7 +98,7 @@ vec4 freeze(ivec2 pos, vec4 self) {
         (pixel(receive(pos + R)).b > 0.5 && pixel(receive(pos + R)).a < 0.5)
     ) {
         // Near water, freeze to sand.
-        float value = 0.75 + 0.25 * noise2(pos);
+        float value = 0.75 + 0.25 * noiseB(pos);
         return  vec4(value, 0.0, 0.0, 0.0);
     }
     return self;
