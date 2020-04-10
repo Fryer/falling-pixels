@@ -1,3 +1,10 @@
+// = Falling Pixels =
+// © 2020 Jacob Lindberg
+//-----------------------
+// Buffer A:
+// - Determines which particle to receive from neighboring pixels.
+// - All movement and most interaction rules are defined here.
+
 const ivec2 A = ivec2(0, 1); // Above.
 const ivec2 B = ivec2(0, -1); // Below.
 const ivec2 L = ivec2(-1, 0); // Left.

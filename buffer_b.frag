@@ -1,3 +1,11 @@
+// = Falling Pixels =
+// © 2020 Jacob Lindberg
+//-----------------------
+// Buffer B:
+// - Holds particle state and moves particles.
+// - Destructive particle interaction happens here after movement.
+// - Drives user interaction.
+
 const ivec2 A = ivec2(0, 1); // Above.
 const ivec2 B = ivec2(0, -1); // Below.
 const ivec2 L = ivec2(-1, 0); // Left.

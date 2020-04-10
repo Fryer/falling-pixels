@@ -1,3 +1,9 @@
+// = Falling Pixels =
+// © 2020 Jacob Lindberg
+//-----------------------
+// Main/image buffer:
+// - Performs shading of the state from Buffer B.
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     ivec2 pos = ivec2(fragCoord);
     vec4 pixel = texelFetch(iChannel0, pos, 0);
