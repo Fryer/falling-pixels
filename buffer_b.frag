@@ -13,12 +13,15 @@ vec4 pixel(ivec2 pos) {
 }
 
 float noise(ivec2 pos) {
-    ivec2 noiseCoord = pos + ivec2(iFrame * 23, iFrame * 7);
+    // 2531 = ClosestPrime(TextureArea * GoldenRatio).
+    int n = iFrame % 4096 * 2531;
+    ivec2 noiseCoord = pos + ivec2(n, n / 64);
     return texelFetch(iChannel1, noiseCoord % 64, 0).r;
 }
 
 float noise2(ivec2 pos) {
-    ivec2 noiseCoord = pos + ivec2(iFrame * 7, iFrame * 23);
+    int n = (iFrame + 2048) % 4096 * 2531;
+    ivec2 noiseCoord = pos + ivec2(n, n / 64);
     return texelFetch(iChannel1, noiseCoord % 64, 0).r;
 }
 
